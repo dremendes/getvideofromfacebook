@@ -2,14 +2,14 @@
 
 Um programa que navega no facebook para baixar vídeo de um post público.
 
-## Instalação
+### Instalação
 ```bash
 $ git clone https://github.com/andremendesc/getvideofromfacebook
 $ cd getvideofromfacebook
 $ yarn install
 ```
 
-## Utilização
+### Utilização
 ```Shell
 $ node getvideofromfb.js <link-do-video-no-facebook>
 ```
@@ -18,14 +18,14 @@ $ node getvideofromfb.js <link-do-video-no-facebook>
 
 A program that browses facebook to download video from a public post
 
-## Installation
+### Installation
 ```Shell
 $ git clone https://github.com/andremendesc/getvideofromfacebook
 $ cd getvideofromfacebook
 $ yarn install
 ```
 
-## Usage
+### Usage
 ```bash
 $ node getvideofromfb.js <link-do-video-no-facebook>
 ```

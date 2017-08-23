@@ -35,6 +35,9 @@ const request = require('request');
     if (isFromFb(link.host)) {
         const page = await browser.newPage();
         
+        // Primeiro visita a versão desktop 
+        // para obter o título. Isso pois na
+        // versão mobile ele é suprimido
         await page.goto("http://www.facebook.com" + 
                          link.href.substring(link.origin.length, link.href.length),
                         {waitUntil: 'networkidle'})
@@ -43,17 +46,18 @@ const request = require('request');
             return document.title.split(' ').join('-') + '.mp4';
         });
 
+        // Visita a versão mobile da página
         await page.goto("http://m.facebook.com" + 
                          link.href.substring(link.origin.length, link.href.length),
                         {waitUntil: 'networkidle'})
 
+        // Dá play no vídeo
         await page.click('#u_0_0 > div > div > div > div > div > i')
                   .catch((error) => {
                     spitLinkError()
                     browser.close();
                     process.exit(-1);
                   });
-
         await page.waitForSelector('#mInlineVideoPlayer', {visible: true});
 
         // Pega o link do video da página

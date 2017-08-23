@@ -1,3 +1,13 @@
+// 
+// Programa para obter arquivo de vídeo a partir 
+// da URL de página de vídeo do Facebook
+// 
+// Utilização:
+// $ node getvideofromfb.js <link-do-video-no-facebook>
+// 
+// License
+// Licensed under the GNU General Public License (GPL) v3. For more information see [LICENSE]
+
 const puppeteer = require('puppeteer');
 const { URL } = require('url');
 const fs = require('fs');
@@ -12,6 +22,8 @@ const request = require('request');
     }
 
     const browser = await puppeteer.launch();
+
+    // Valida a URL de argumento
     try {
         new URL(process.argv[2]);
     } catch (err) {
@@ -64,8 +76,6 @@ const request = require('request');
         const videoLink = await page.evaluate(() => {
             return document.getElementById('mInlineVideoPlayer').src;
         });
-
-        const date = new Date();
 
         request
             .get(videoLink, {timeout: 3000000})

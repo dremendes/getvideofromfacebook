@@ -35,7 +35,7 @@ const request = require('request');
         spitLinkErrorAndExit()
     }
 
-    const isFromFb = async (url) => {
+    const isFromFb = (url) => {
         return ["www.facebook.com",
             "facebook.com",
             "www.fb.com",
@@ -45,7 +45,7 @@ const request = require('request');
            ].includes(url)
     }
 
-    const isFromTwitter = async (url) => {
+    const isFromTwitter = (url) => {
         return ["www.twitter.com",
             "twitter.com",
             "mobile.twitter.com",
@@ -70,76 +70,75 @@ const request = require('request');
         spitLinkErrorAndExit()
     }
 
+    const page = await browser.newPage()
+
     // Seguir roteiro do twitter ou do facebook?
-    await isFromTwitter(link.host).then(async function(result){
-        const page = await browser.newPage()
-        if (result) {
-            // Primeiro visita a versão desktop 
-            // para obter o título. Isso pois na
-            // versão mobile ele é suprimido
-            const fixedLink = new URL("http://www.twitter.com" + 
-                                    link.href.substring(link.origin.length, link.href.length) +
-                                    ((link.href[link.href.length - 1] != '/') ? '/' : '') )
+    if( isFromTwitter(link.host) ) {
+        // Primeiro visita a versão desktop 
+        // para obter o título. Isso pois na
+        // versão mobile ele é suprimido
+        const fixedLink = new URL("http://www.twitter.com" + 
+                                link.href.substring(link.origin.length, link.href.length) +
+                                ((link.href[link.href.length - 1] != '/') ? '/' : '') )
 
-            await page.goto(fixedLink.href, {waitUntil: 'networkidle', networkIdleTimeout: 5000})
-            const outputFileName = await page.evaluate(() => {
-                return document.title.split(' ').join('-').split('/').join('') + '.mp4'
-            })
-            // Visita a versão mobile do vídeo da página
-            await page.goto("http://mobile.twitter.com" + 
-                             fixedLink.href.substring(fixedLink.origin.length, fixedLink.href.length) + "video/1",
-                            {waitUntil: 'networkidle', networkIdleTimeout: 5000})
-            // Pega o link do video
-            const videoLink = await page.evaluate(() => {
-                try{
-                    return document.getElementsByTagName('source')[0].src
-                } catch (err) {
-                    console.log('Talvez algo tenha mudado no twitter? Não consegui achar o vídeo :(')
-                    return false
-                }
-            })
-            if (!videoLink){ spitLinkErrorAndExit(false) }
-            // Baixa e salva no disco
-            await downloadVideo(videoLink, outputFileName)
+        await page.goto(fixedLink.href, {waitUntil: 'networkidle', networkIdleTimeout: 5000})
+        const outputFileName = await page.evaluate(() => {
+            return document.title.split(' ').join('-').split('/').join('') + '.mp4'
+        })
+        // Visita a versão mobile do vídeo da página
+        await page.goto("http://mobile.twitter.com" + 
+                         fixedLink.href.substring(fixedLink.origin.length, fixedLink.href.length) + "video/1",
+                        {waitUntil: 'networkidle', networkIdleTimeout: 5000})
+        // Pega o link do video
+        const videoLink = await page.evaluate(() => {
+            try{
+                return document.getElementsByTagName('source')[0].src
+            } catch (err) {
+                console.log('Talvez algo tenha mudado no twitter? Não consegui achar o vídeo :(')
+                return false
+            }
+        })
+        if (!videoLink){ spitLinkErrorAndExit(false) }
+        // Baixa e salva no disco
+        await downloadVideo(videoLink, outputFileName)
 
-            console.log('Video baixado em ' + outputFileName)
-        } else {
-            // Primeiro visita a versão desktop 
-            // para obter o título. Isso pois na
-            // versão mobile ele é suprimido
-            await page.goto("http://www.facebook.com" + 
-                             link.href.substring(link.origin.length, link.href.length),
-                            {waitUntil: 'networkidle', networkIdleTimeout: 5000})
-            const outputFileName = await page.evaluate(() => {
-                return document.title.split(' ').join('-') + '.mp4'
-            })
-            // Visita a versão mobile da página
-            await page.goto("http://m.facebook.com" + 
-                             link.href.substring(link.origin.length, link.href.length),
-                            {waitUntil: 'networkidle', networkIdleTimeout: 5000})
-            // Dá play no vídeo
-            await page.click('#u_0_0 > div > div > div > div > div > i')
-                      .catch((error) => {
-                        console.log('Erro ao clicar, será que a estrutura mudou?')
-                        spitLinkErrorAndExit(false)
-                      })
-            await page.waitForSelector('#mInlineVideoPlayer', {visible: true})
-            // Pega o link do video da página
-            const videoLink = await page.evaluate(() => {
-                try{
-                    return document.getElementById('mInlineVideoPlayer').src
-                } catch (err) {
-                    console.log('Será que a estrutura mudou? Não consegui encontrar o vídeo :(')
-                    return false
-                }
-            })
-            if (!videoLink){ spitLinkErrorAndExit(false) }
-            // Baixa e salva no disco
-            await downloadVideo(videoLink, outputFileName)
+        console.log('Video baixado em ' + outputFileName)
+    } else {
+        // Primeiro visita a versão desktop 
+        // para obter o título. Isso pois na
+        // versão mobile ele é suprimido
+        await page.goto("http://www.facebook.com" + 
+                         link.href.substring(link.origin.length, link.href.length),
+                        {waitUntil: 'networkidle', networkIdleTimeout: 5000})
+        const outputFileName = await page.evaluate(() => {
+            return document.title.split(' ').join('-') + '.mp4'
+        })
+        // Visita a versão mobile da página
+        await page.goto("http://m.facebook.com" + 
+                         link.href.substring(link.origin.length, link.href.length),
+                        {waitUntil: 'networkidle', networkIdleTimeout: 5000})
+        // Dá play no vídeo
+        await page.click('#u_0_0 > div > div > div > div > div > i')
+                  .catch((error) => {
+                    console.log('Erro ao clicar, será que a estrutura mudou?')
+                    spitLinkErrorAndExit(false)
+                  })
+        await page.waitForSelector('#mInlineVideoPlayer', {visible: true})
+        // Pega o link do video da página
+        const videoLink = await page.evaluate(() => {
+            try{
+                return document.getElementById('mInlineVideoPlayer').src
+            } catch (err) {
+                console.log('Será que a estrutura mudou? Não consegui encontrar o vídeo :(')
+                return false
+            }
+        })
+        if (!videoLink){ spitLinkErrorAndExit(false) }
+        // Baixa e salva no disco
+        await downloadVideo(videoLink, outputFileName)
 
-            console.log('Video baixado em ' + outputFileName)
-        }
-    })
+        console.log('Video baixado em ' + outputFileName)
+    }
 
-    await browser.close()
+    browser.close()
 })();

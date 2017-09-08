@@ -10,6 +10,11 @@ $ yarn install
 ```
 
 ### Utilização
+Certifique-se que está usando uma versão recente do node
+```Shell
+$ nvm install 8.4.0
+```
+daí basta:
 ```Shell
 $ node getvideofromfb.js <link-do-video-no-facebook-ou-twitter>
 ```
@@ -30,6 +35,11 @@ $ yarn install
 ```
 
 ### Usage
+Make sure you're running a recent version of node
+```Shell
+$ nvm install 8.4.0
+```
+then you can just:
 ```bash
 $ node getvideofromfb.js <link-of-post-or-tweet-with-video>
 ```
